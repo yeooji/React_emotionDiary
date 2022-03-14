@@ -1,4 +1,4 @@
-import {useReducer, useRef} from "react"; // 최상단에 해주는게 좋다.
+import React, {useReducer, useRef} from "react"; // 최상단에 해주는게 좋다.
 
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -38,12 +38,50 @@ const reducer = (state, action) => {
     return newState;
 }
 
+export const DiaryStateContext = React.createContext();
+export const DiaryDispatchContext = React.createContext();
+
+const dummyData = [
+  {
+    id: 1,
+    emotion: 1,
+    content: '오늘의 일기 1번',
+    data: 1647269015085
+  },
+  {
+    id: 2,
+    emotion: 2,
+    content: '오늘의 일기 2번',
+    data: 1647269015086
+  },
+  {
+    id: 3,
+    emotion: 3,
+    content: '오늘의 일기 3번',
+    data: 1647269015087
+  },
+  {
+    id: 4,
+    emotion: 4,
+    content: '오늘의 일기 4번',
+    data: 1647269015088
+  },
+  {
+    id: 5,
+    emotion: 5,
+    content: '오늘의 일기 5번',
+    data: 1647269015089
+  }
+];
+
 function App() {
 
-  const [data,dispatch] = useReducer(reducer, []);
+  const [data,dispatch] = useReducer(reducer, dummyData);
+
+  //console.log(new Date().getTime());
 
   const dataId = useRef(0);
-  
+
   // CREATE
   const onCreate = (date, content, emotion) => {
     dispatch({
@@ -68,25 +106,31 @@ function App() {
     dispatch({
       type: "EDIT",
       data: {
-        id: dataId.current,
+        id: targetId,
         data: new Date(date).getTime(),
         content,
-        emotion,
+        emotion
       }
     },);
   }
 
   return (
-    <BrowserRouter>
-      <div className="App">
-        <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/new' element={<New />} />
-          <Route path='/edit' element={<Edit />} />
-          <Route path='/diary/:id' element={<Diary />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider value={{
+        onCreate, onRemove, onEdit
+      }}>
+        <BrowserRouter>
+          <div className="App">
+            <Routes>
+              <Route path='/' element={<Home />} />
+              <Route path='/new' element={<New />} />
+              <Route path='/edit' element={<Edit />} />
+              <Route path='/diary/:id' element={<Diary />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
   );
 }
 
